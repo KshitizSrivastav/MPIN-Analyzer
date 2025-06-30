@@ -7,8 +7,13 @@ This script runs the MPIN analyzer directly with system Python
 import os
 import sys
 
-# Set environment to development to avoid SECRET_KEY issues
-os.environ['FLASK_ENV'] = 'development'
+# Detect if running on Render (production) or locally (development)
+is_production = os.environ.get('PORT') is not None or os.environ.get('RENDER') is not None
+
+if is_production:
+    os.environ['FLASK_ENV'] = 'production'
+else:
+    os.environ['FLASK_ENV'] = 'development'
 
 try:
     from flask import Flask, render_template, request, jsonify
@@ -20,13 +25,28 @@ try:
     
     # Create Flask app directly
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = 'development-secret-key'
-    app.config['DEBUG'] = True
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'development-secret-key')
+    app.config['DEBUG'] = not is_production  # Only debug in development
     
     @app.route('/')
     def index():
         """Main page with MPIN strength checker interface"""
         return render_template('index.html')
+    
+    @app.route('/health')
+    def health_check():
+        """Health check endpoint for Render"""
+        return jsonify({
+            'status': 'healthy',
+            'timestamp': datetime.now().isoformat(),
+            'service': 'MPIN Analyzer',
+            'environment': os.environ.get('FLASK_ENV', 'unknown')
+        })
+    
+    @app.route('/ping')
+    def ping():
+        """Simple ping endpoint"""
+        return 'pong'
     
     @app.route('/debug')
     def debug():
@@ -247,29 +267,40 @@ try:
             })
     
     def main():
-        print("🛡️  MPIN Strength Analyzer - Simple Launcher")
-        print("=" * 60)
-        print("🐍 Using System Python (No Virtual Environment)")
-        print("🌐 Starting web application...")
-        print("📋 Flask app configured for development")
-        print("🔒 Using default secret key for development")
-        print("=" * 60)
-        print("🌐 Application will be available at:")
-        print("   http://localhost:5000")
-        print("   http://127.0.0.1:5000")
-        print("=" * 60)
-        print("🎯 Features:")
-        print("   • MPIN Strength Analysis")
-        print("   • Common Pattern Detection") 
-        print("   • Demographic Information Checking")
-        print("   • Test Case Validation")
-        print("   • Security Recommendations")
-        print("=" * 60)
-        print("Press Ctrl+C to stop the server")
-        print("=" * 60)
+        # Get port from environment (Render sets this automatically)
+        port = int(os.environ.get('PORT', 5000))
+        host = '0.0.0.0'
         
+        if is_production:
+            print(f"� Starting MPIN Analyzer in PRODUCTION mode")
+            print(f"🌐 Server starting on {host}:{port}")
+            print("=" * 60)
+            # Production settings - no debug output
+            app.run(host=host, port=port, debug=False, threaded=True)
+        else:
+            print("�🛡️  MPIN Strength Analyzer - Simple Launcher")
+            print("=" * 60)
+            print("🐍 Using System Python (No Virtual Environment)")
+            print("🌐 Starting web application...")
+            print("📋 Flask app configured for development")
+            print("🔒 Using default secret key for development")
+            print("=" * 60)
+            print("🌐 Application will be available at:")
+            print("   http://localhost:5000")
+            print("   http://127.0.0.1:5000")
+            print("=" * 60)
+            print("🎯 Features:")
+            print("   • MPIN Strength Analysis")
+            print("   • Common Pattern Detection") 
+            print("   • Demographic Information Checking")
+            print("   • Test Case Validation")
+            print("   • Security Recommendations")
+            print("=" * 60)
+            print("Press Ctrl+C to stop the server")
+            print("=" * 60)
+            
         try:
-            app.run(host='0.0.0.0', port=5000, debug=True)
+            app.run(host=host, port=port, debug=not is_production)
         except KeyboardInterrupt:
             print("\n👋 Thank you for using MPIN Strength Analyzer!")
             print("Application stopped.")

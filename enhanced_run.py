@@ -31,7 +31,7 @@ try:
     @app.route('/debug')
     def debug():
         """Debug test page for MPIN analysis"""
-        return render_template('debug_test.html')
+        return render_template('simple_debug.html')
     
     @app.route('/api/check_mpin', methods=['POST'])
     def check_mpin():

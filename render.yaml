@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: mpin-analyzer
+    env: python
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: python wsgi.py
+    plan: free
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.16
+      - key: SECRET_KEY
+        generateValue: true
+    healthCheckPath: /

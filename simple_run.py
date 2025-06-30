@@ -49,11 +49,6 @@ try:
         """Main page with MPIN strength checker interface"""
         return render_template('index.html')
     
-    @app.route('/ping')
-    def ping():
-        """Simple ping endpoint"""
-        return 'pong'
-    
     @app.route('/debug')
     def debug():
         """Debug test page for MPIN analysis"""

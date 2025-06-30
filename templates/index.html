@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MPIN Strength Analyzer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --success-color: #16a34a;
+            --warning-color: #ca8a04;
+            --danger-color: #dc2626;
+            --light-bg: #f8fafc;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            
+            /* Light theme variables */
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --container-bg: rgba(255, 255, 255, 0.95);
+            --card-bg: #ffffff;
+            --text-color: #1f2937;
+            --text-muted: #6b7280;
+            --border-color: #e2e8f0;
+            --input-bg: #ffffff;
+            --header-gradient: linear-gradient(135deg, var(--primary-color), #3b82f6);
+        }
+
+        [data-theme="dark"] {
+            /* Dark theme variables */
+            --bg-gradient: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            --container-bg: rgba(30, 41, 59, 0.95);
+            --card-bg: #1e293b;
+            --text-color: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --input-bg: #0f172a;
+            --header-gradient: linear-gradient(135deg, #1e40af, #2563eb);
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            padding: 0;
+            margin: 0;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .main-container {
+            background: var(--container-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            margin: 1rem auto;
+            max-width: 1200px;
+            width: calc(100% - 2rem);
+        }
+
+        .header {
+            background: var(--header-gradient);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 20px 20px 0 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-bottom: 1rem;
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] .card:hover {
+            box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.4);
+        }
+
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+            padding: 0.75rem 1rem;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+            background: var(--input-bg);
+            color: var(--text-color);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+            background: var(--input-bg);
+            color: var(--text-color);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted);
+        }
+
+        .btn {
+            border-radius: 10px;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+            min-height: 48px; /* Better touch targets for mobile */
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1d4ed8, var(--primary-color));
+            transform: translateY(-1px);
+        }
+
+        .strength-indicator {
+            height: 8px;
+            border-radius: 4px;
+            margin: 1rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .strength-strong {
+            background: linear-gradient(90deg, var(--success-color), #22c55e);
+        }
+
+        .strength-weak {
+            background: linear-gradient(90deg, var(--danger-color), #ef4444);
+        }
+
+        .strength-invalid {
+            background: linear-gradient(90deg, var(--secondary-color), #94a3b8);
+        }
+
+        .result-card {
+            border-left: 4px solid var(--primary-color);
+            background: var(--light-bg);
+        }
+
+        .badge {
+            font-size: 0.875rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+        }
+
+        .analysis-section {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 1rem 0;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        .result-card {
+            border-left: 4px solid var(--primary-color);
+            background: var(--light-bg);
+            color: var(--text-color);
+        }
+
+        [data-theme="dark"] .result-card {
+            background: var(--input-bg);
+        }
+
+        .form-text {
+            color: var(--text-muted) !important;
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            border-radius: 8px;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .theme-toggle i {
+            font-size: 1.2rem;
+        }
+
+        .test-results {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .test-result-item {
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+
+        .test-passed {
+            background: #f0f9ff;
+            border-left-color: var(--success-color);
+        }
+
+        /* Mobile-first responsive design */
+        
+        /* Small devices (phones, less than 576px) */
+        @media (max-width: 575.98px) {
+            .main-container {
+                margin: 0.5rem auto;
+                border-radius: 15px;
+                width: calc(100% - 1rem);
+            }
+            
+            .header {
+                padding: 1rem;
+                border-radius: 15px 15px 0 0;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .header p {
+                font-size: 0.9rem;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .analysis-section {
+                padding: 0.75rem;
+                margin: 0.5rem 0;
+            }
+            
+            .btn {
+                padding: 0.875rem 1rem;
+                font-size: 0.95rem;
+                width: 100%;
+            }
+            
+            .form-control, .form-select {
+                padding: 0.875rem 1rem;
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+            
+            .test-results {
+                max-height: 300px;
+            }
+            
+            /* Stack cards vertically on mobile */
+            .row > .col-lg-6 {
+                margin-bottom: 1rem;
+            }
+            
+            /* Smaller badges and text on mobile */
+            .badge {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.8rem;
+            }
+            
+            /* Adjust tab content padding */
+            .tab-content {
+                padding: 0.5rem;
+            }
+        }
+        
+        /* Medium devices (tablets, 576px to 991.98px) */
+        @media (min-width: 576px) and (max-width: 991.98px) {
+            .main-container {
+                margin: 1rem auto;
+                width: calc(100% - 2rem);
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .analysis-section {
+                padding: 1.25rem;
+            }
+            
+            .test-results {
+                max-height: 350px;
+            }
+        }
+        
+        /* Large devices (desktops, 992px and up) */
+        @media (min-width: 992px) {
+            .main-container {
+                margin: 2rem auto;
+            }
+            
+            .header {
+                padding: 2rem;
+            }
+            
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .header p {
+                font-size: 1.1rem;
+            }
+            
+            .analysis-section {
+                padding: 1.5rem;
+            }
+        }
+        
+        /* Extra large devices (large desktops, 1200px and up) */
+        @media (min-width: 1200px) {
+            .main-container {
+                max-width: 1200px;
+            }
+        }
+        
+        /* Landscape orientation adjustments for tablets */
+        @media (max-width: 991.98px) and (orientation: landscape) {
+            .header {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 1.75rem;
+            }
+            
+            .test-results {
+                max-height: 250px;
+            }
+        }
+        
+        /* Touch-friendly improvements */
+        @media (pointer: coarse) {
+            .btn {
+                min-height: 48px;
+                padding: 1rem 1.5rem;
+            }
+            
+            .form-control, .form-select {
+                min-height: 48px;
+                padding: 1rem;
+            }
+            
+            .nav-link {
+                padding: 1rem 1.25rem;
+                font-size: 1rem;
+            }
+        }
+        
+        /* High DPI display optimizations */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .card {
+                box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.15);
+            }
+        }
+
+        .test-failed {
+            background: #fef2f2;
+            border-left-color: var(--danger-color);
+        }
+
+        .loading {
+            display: none;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .feature-icon {
+            width: 3rem;
+            height: 3rem;
+            background: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+            margin: 0 auto 1rem;
+        }
+
+        /* Prevent horizontal scroll on mobile */
+        html, body {
+            overflow-x: hidden;
+        }
+        
+        /* Smooth scrolling for better mobile experience */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Prevent text selection on buttons for better touch experience */
+        .btn, .nav-link {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        /* Better focus states for accessibility */
+        .form-control:focus, .btn:focus {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+        
+        /* Loading state improvements */
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        @media (max-width: 768px) {
+            .main-container {
+                margin: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        /* Footer Styles */
+        .footer {
+            background: rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .footer .text-white-50 {
+            color: rgba(255, 255, 255, 0.7) !important;
+        }
+        
+        .footer .text-white {
+            color: rgba(255, 255, 255, 0.95) !important;
+        }
+        
+        .footer i.bi-heart-fill {
+            animation: heartbeat 2s ease-in-out infinite;
+        }
+        
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            14% { transform: scale(1.1); }
+            28% { transform: scale(1); }
+            42% { transform: scale(1.1); }
+            70% { transform: scale(1); }
+        }
+        
+        /* Mobile footer adjustments */
+        @media (max-width: 575.98px) {
+            .footer {
+                margin-top: 2rem;
+            }
+            
+            .footer .py-3 {
+                padding-top: 1rem !important;
+                padding-bottom: 1rem !important;
+            }
+            
+            .footer small {
+                font-size: 0.75rem;
+            }
+        }
+
+        /* Dark theme specific overrides */
+        [data-theme="dark"] .nav-link {
+            color: var(--text-color);
+        }
+        
+        [data-theme="dark"] .nav-link.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        [data-theme="dark"] .card-header {
+            background-color: var(--border-color) !important;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-color) !important;
+        }
+        
+        [data-theme="dark"] .badge {
+            color: white !important;
+        }
+        
+        [data-theme="dark"] .text-muted {
+            color: var(--text-muted) !important;
+        }
+        
+        [data-theme="dark"] .list-unstyled li i {
+            color: inherit;
+        }
+        
+        [data-theme="dark"] .alert-success {
+            background-color: rgba(22, 163, 74, 0.1);
+            border-color: rgba(22, 163, 74, 0.2);
+            color: #86efac;
+        }
+        
+        [data-theme="dark"] .alert-danger {
+            background-color: rgba(220, 38, 38, 0.1);
+            border-color: rgba(220, 38, 38, 0.2);
+            color: #fca5a5;
+        }
+        
+        /* Loading state improvements for dark theme */
+        [data-theme="dark"] .spinner-border {
+            color: rgba(255, 255, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="main-container">
+            <div class="header">
+                <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+                    <i class="bi bi-moon-fill" id="themeIcon"></i>
+                </button>
+                <h1><i class="bi bi-shield-check"></i> MPIN Strength Analyzer</h1>
+                <p>Secure Your Mobile Banking with Strong MPIN Analysis</p>
+            </div>
+
+            <div class="p-2 p-md-4">
+                <!-- Navigation Tabs -->
+                <ul class="nav nav-pills mb-3 mb-md-4 justify-content-center flex-column flex-sm-row" id="mainTabs" role="tablist">
+                    <li class="nav-item mb-1 mb-sm-0" role="presentation">
+                        <button class="nav-link active w-100 w-sm-auto text-center" id="analyzer-tab" data-bs-toggle="pill" data-bs-target="#analyzer" type="button" role="tab">
+                            <i class="bi bi-calculator"></i> <span class="d-none d-sm-inline">MPIN </span>Analyzer
+                        </button>
+                    </li>
+                    <li class="nav-item mb-1 mb-sm-0" role="presentation">
+                        <button class="nav-link w-100 w-sm-auto text-center" id="tests-tab" data-bs-toggle="pill" data-bs-target="#tests" type="button" role="tab">
+                            <i class="bi bi-clipboard-data"></i> <span class="d-none d-sm-inline">Test Your </span>MPIN
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link w-100 w-sm-auto text-center" id="about-tab" data-bs-toggle="pill" data-bs-target="#about" type="button" role="tab">
+                            <i class="bi bi-info-circle"></i> About
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content" id="mainTabContent">
+                    <!-- MPIN Analyzer Tab -->
+                    <div class="tab-pane fade show active" id="analyzer" role="tabpanel">
+                        <div class="row g-3 g-md-4">
+                            <div class="col-lg-6 col-md-12">
+                                <div class="card h-100">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="mb-0"><i class="bi bi-input-cursor"></i> Enter Your MPIN Details</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <form id="mpinForm">
+                                            <div class="mb-3">
+                                                <label for="pin" class="form-label">MPIN (4 or 6 digits) *</label>
+                                                <input type="text" class="form-control form-control-lg" id="pin" placeholder="Enter your MPIN" maxlength="6" pattern="[0-9]*" inputmode="numeric">
+                                                <div class="form-text">Enter a 4 or 6 digit MPIN</div>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label for="birthDate" class="form-label">Your Date of Birth</label>
+                                                <input type="text" class="form-control" id="birthDate" placeholder="DD-MM-YYYY" inputmode="numeric">
+                                                <div class="form-text">Optional: Used to check if MPIN contains birth date</div>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label for="spouseBirthDate" class="form-label">Spouse's Date of Birth</label>
+                                                <input type="text" class="form-control" id="spouseBirthDate" placeholder="DD-MM-YYYY" inputmode="numeric">
+                                                <div class="form-text">Optional: Used to check if MPIN contains spouse's birth date</div>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label for="weddingDate" class="form-label">Wedding/Anniversary Date</label>
+                                                <input type="text" class="form-control" id="weddingDate" placeholder="DD-MM-YYYY" inputmode="numeric">
+                                                <div class="form-text">Optional: Used to check if MPIN contains anniversary date</div>
+                                            </div>
+
+                                            <button type="submit" class="btn btn-primary btn-lg w-100">
+                                                <span class="loading spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                                <span class="btn-text">Analyze MPIN Strength</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 col-md-12">
+                                <div class="card h-100">
+                                    <div class="card-header bg-success text-white">
+                                        <h5 class="mb-0"><i class="bi bi-graph-up"></i> Analysis Results</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="results" style="display: none;">
+                                            <!-- Results will be populated here -->
+                                        </div>
+                                        <div id="placeholder" class="text-center text-muted">
+                                            <i class="bi bi-shield-exclamation d-block mx-auto mb-3" style="font-size: 3rem; opacity: 0.3;"></i>
+                                            <p class="mt-3">Enter your MPIN details above to see the security analysis</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Test Cases Tab -->
+                    <div class="tab-pane fade" id="tests" role="tabpanel">
+                        <div class="row g-3 g-md-4">
+                            <div class="col-lg-6 col-md-12">
+                                <div class="card h-100">
+                                    <div class="card-header bg-info text-white">
+                                        <h5 class="mb-0"><i class="bi bi-input-cursor-text"></i> Test Your Own MPIN</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <form id="testForm">
+                                            <div class="mb-3">
+                                                <label for="testPin" class="form-label">Test MPIN (4 or 6 digits) *</label>
+                                                <input type="text" class="form-control form-control-lg" id="testPin" placeholder="Enter MPIN to test" maxlength="6" pattern="[0-9]*" inputmode="numeric">
+                                                <div class="form-text">Enter any 4 or 6 digit MPIN to analyze</div>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label for="testBirthDate" class="form-label">Date of Birth (Optional)</label>
+                                                <input type="text" class="form-control" id="testBirthDate" placeholder="DD-MM-YYYY" inputmode="numeric">
+                                                <div class="form-text">Used to check demographic vulnerabilities</div>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label for="testSpouseBirthDate" class="form-label">Spouse's Date of Birth (Optional)</label>
+                                                <input type="text" class="form-control" id="testSpouseBirthDate" placeholder="DD-MM-YYYY" inputmode="numeric">
+                                                <div class="form-text">Used to check spouse demographic patterns</div>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label for="testWeddingDate" class="form-label">Wedding/Anniversary Date (Optional)</label>
+                                                <input type="text" class="form-control" id="testWeddingDate" placeholder="DD-MM-YYYY" inputmode="numeric">
+                                                <div class="form-text">Used to check anniversary date patterns</div>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label">Test Categories to Run:</label>
+                                                <div class="row">
+                                                    <div class="col-12 col-sm-6 col-lg-12">
+                                                        <div class="form-check mb-2">
+                                                            <input class="form-check-input" type="checkbox" value="common_check" id="commonCheck" checked>
+                                                            <label class="form-check-label" for="commonCheck">
+                                                                <strong>Part A:</strong> <span class="d-block d-sm-inline">Common Pattern Detection</span>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12 col-sm-6 col-lg-12">
+                                                        <div class="form-check mb-2">
+                                                            <input class="form-check-input" type="checkbox" value="strength_check" id="strengthCheck" checked>
+                                                            <label class="form-check-label" for="strengthCheck">
+                                                                <strong>Part B:</strong> <span class="d-block d-sm-inline">Strength Classification</span>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <div class="form-check mb-2">
+                                                            <input class="form-check-input" type="checkbox" value="detailed_check" id="detailedCheck" checked>
+                                                            <label class="form-check-label" for="detailedCheck">
+                                                                <strong>Part C:</strong> <span class="d-block d-sm-inline">Detailed Analysis with Reasons</span>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <button type="submit" class="btn btn-info btn-lg w-100">
+                                                <span class="loading spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                                <span class="btn-text">Run Test Analysis</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 col-md-12">
+                                <div class="card h-100">
+                                    <div class="card-header bg-success text-white">
+                                        <h5 class="mb-0"><i class="bi bi-check2-square"></i> Test Results</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="testResults">
+                                            <div class="text-center text-muted">
+                                                <i class="bi bi-clipboard-data d-block mx-auto mb-3" style="font-size: 3rem; opacity: 0.3;"></i>
+                                                <p class="mt-3">Enter your test MPIN above to see detailed analysis results</p>
+                                                <div class="mt-4">
+                                                    <h6>What will be tested:</h6>
+                                                    <ul class="list-unstyled text-start">
+                                                        <li class="mb-1"><i class="bi bi-check-circle text-info me-2"></i>Common pattern detection</li>
+                                                        <li class="mb-1"><i class="bi bi-check-circle text-info me-2"></i>Strength classification</li>
+                                                        <li class="mb-1"><i class="bi bi-check-circle text-info me-2"></i>Demographic vulnerabilities</li>
+                                                        <li class="mb-1"><i class="bi bi-check-circle text-info me-2"></i>Security recommendations</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- About Tab -->
+                    <div class="tab-pane fade" id="about" role="tabpanel">
+                        <div class="row g-3 g-md-4">
+                            <div class="col-lg-8 col-md-12">
+                                <div class="card">
+                                    <div class="card-header bg-secondary text-white">
+                                        <h5 class="mb-0"><i class="bi bi-info-circle"></i> About MPIN Strength Analyzer</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="lead">This application analyzes the strength of Mobile PIN (MPIN) used in mobile banking and digital payment systems.</p>
+                                        
+                                        <h6>What is MPIN?</h6>
+                                        <p>MPIN (Mobile Personal Identification Number) is a 4 or 6-digit numeric password used to authenticate mobile banking transactions and digital payments.</p>
+
+                                        <h6>Security Analysis Features:</h6>
+                                        <ul class="mb-4">
+                                            <li class="mb-2"><strong>Common Pattern Detection:</strong> Identifies commonly used PINs like 1111, 1234, 0000</li>
+                                            <li class="mb-2"><strong>Demographic Analysis:</strong> Checks if PIN contains personal dates (birth date, spouse's birth date, anniversary)</li>
+                                            <li class="mb-2"><strong>Sequential Pattern Detection:</strong> Identifies sequential numbers and repeating patterns</li>
+                                            <li class="mb-2"><strong>Strength Scoring:</strong> Provides overall security score and recommendations</li>
+                                        </ul>
+
+                                        <h6>PIN Strength Categories:</h6>
+                                        <div class="row g-2 g-md-3">
+                                            <div class="col-md-4 col-sm-6">
+                                                <div class="text-center p-3 border rounded">
+                                                    <div class="badge bg-success mb-2 fs-6">STRONG</div>
+                                                    <p class="small mb-0">No common patterns or personal information detected</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 col-sm-6">
+                                                <div class="text-center p-3 border rounded">
+                                                    <div class="badge bg-danger mb-2 fs-6">WEAK</div>
+                                                    <p class="small mb-0">Contains common patterns or personal information</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 col-sm-12">
+                                                <div class="text-center p-3 border rounded">
+                                                    <div class="badge bg-secondary mb-2 fs-6">INVALID</div>
+                                                    <p class="small mb-0">Invalid format or length</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-12">
+                                <div class="card">
+                                    <div class="card-header bg-warning text-dark">
+                                        <h6 class="mb-0"><i class="bi bi-shield-exclamation"></i> Security Tips</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="analysis-section">
+                                            <h6><i class="bi bi-check-circle text-success"></i> Do:</h6>
+                                            <ul class="small">
+                                                <li>Use random digit combinations</li>
+                                                <li>Avoid obvious patterns</li>
+                                                <li>Change MPIN regularly</li>
+                                                <li>Keep MPIN confidential</li>
+                                            </ul>
+                                        </div>
+                                        <div class="analysis-section">
+                                            <h6><i class="bi bi-x-circle text-danger"></i> Don't:</h6>
+                                            <ul class="small">
+                                                <li>Use birth dates or anniversaries</li>
+                                                <li>Use sequential numbers (1234, 4321)</li>
+                                                <li>Use repeated digits (1111, 0000)</li>
+                                                <li>Share your MPIN with others</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="text-center py-3">
+                        <div class="d-flex justify-content-center align-items-center flex-wrap">
+                            <span class="text-white-50 me-2">Made with</span>
+                            <i class="bi bi-heart-fill text-danger mx-1"></i>
+                            <span class="text-white-50 me-2">by</span>
+                            <strong class="text-white">Kshitiz Srivastav</strong>
+                        </div>
+                        <div class="mt-2">
+                            <small class="text-white-50">
+                                <i class="bi bi-shield-check me-1"></i>
+                                Secure MPIN Analysis Tool
+                                <span class="mx-2">•</span>
+                                <i class="bi bi-calendar-event me-1"></i>
+                                2025
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // MPIN Form Handler
+        document.getElementById('mpinForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            console.log('MPIN Form submitted');
+            
+            const btn = this.querySelector('button[type="submit"]');
+            const loading = btn.querySelector('.loading');
+            const btnText = btn.querySelector('.btn-text');
+            
+            // Show loading state
+            loading.classList.add('show');
+            btnText.textContent = 'Analyzing...';
+            btn.disabled = true;
+            
+            const formData = {
+                pin: document.getElementById('pin').value,
+                birth_date: document.getElementById('birthDate').value,
+                spouse_birth_date: document.getElementById('spouseBirthDate').value,
+                wedding_date: document.getElementById('weddingDate').value
+            };
+            
+            console.log('Form data:', formData);
+            
+            try {
+                console.log('Sending request to /api/check_mpin');
+                const response = await fetch('/api/check_mpin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                console.log('Response status:', response.status);
+                const result = await response.json();
+                console.log('Response data:', result);
+                displayResults(result);
+                
+            } catch (error) {
+                console.error('Error during MPIN analysis:', error);
+                displayError('Error analyzing MPIN. Please try again.');
+            } finally {
+                // Hide loading state
+                loading.classList.remove('show');
+                btnText.textContent = 'Analyze MPIN Strength';
+                btn.disabled = false;
+            }
+        });
+
+        function displayResults(result) {
+            console.log('displayResults called with:', result);
+            const resultsDiv = document.getElementById('results');
+            const placeholder = document.getElementById('placeholder');
+            
+            if (!result.success) {
+                console.log('Result not successful:', result.error);
+                displayError(result.error);
+                return;
+            }
+            
+            console.log('Processing successful result');
+            const strengthClass = result.strength.toLowerCase();
+            const strengthColor = result.strength === 'STRONG' ? 'success' : 
+                                 result.strength === 'WEAK' ? 'danger' : 'secondary';
+            
+            const reasonsBadges = result.reasons.map(reason => {
+                const reasonText = reason.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+                return `<span class="badge bg-warning text-dark me-1 mb-1">${reasonText}</span>`;
+            }).join('');
+            
+            const recommendationsHtml = result.analysis.recommendations.map(rec => 
+                `<li><i class="bi bi-arrow-right text-primary"></i> ${rec}</li>`
+            ).join('');
+            
+            const demographicMatches = result.analysis.demographic_matches.length > 0 ? 
+                result.analysis.demographic_matches.map(match => 
+                    `<li class="text-warning"><i class="bi bi-exclamation-triangle"></i> ${match}</li>`
+                ).join('') : '<li class="text-success"><i class="bi bi-check-circle"></i> No demographic matches found</li>';
+            
+            const commonPatterns = result.analysis.common_patterns.length > 0 ? 
+                result.analysis.common_patterns.map(pattern => 
+                    `<li class="text-danger"><i class="bi bi-x-circle"></i> ${pattern}</li>`
+                ).join('') : '<li class="text-success"><i class="bi bi-check-circle"></i> No common patterns detected</li>';
+            
+            console.log('Generated HTML elements');
+            
+            resultsDiv.innerHTML = `
+                <div class="fade-in">
+                    <div class="result-card p-3 mb-3">
+                        <h6><i class="bi bi-shield-${strengthColor === 'success' ? 'check' : 'exclamation'}"></i> MPIN: ${result.pin}</h6>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>Strength:</span>
+                            <span class="badge bg-${strengthColor}">${result.strength}</span>
+                        </div>
+                        <div class="strength-indicator strength-${strengthClass}"></div>
+                        <div class="d-flex justify-content-between">
+                            <small>Security Score:</small>
+                            <small><strong>${result.analysis.strength_score}/100</strong></small>
+                        </div>
+                    </div>
+                    
+                    ${result.reasons.length > 0 ? `
+                    <div class="analysis-section">
+                        <h6><i class="bi bi-exclamation-triangle text-warning"></i> Security Issues Found:</h6>
+                        <div>${reasonsBadges}</div>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="analysis-section">
+                        <h6><i class="bi bi-search"></i> Demographic Analysis:</h6>
+                        <ul class="list-unstyled">${demographicMatches}</ul>
+                    </div>
+                    
+                    <div class="analysis-section">
+                        <h6><i class="bi bi-pattern"></i> Pattern Analysis:</h6>
+                        <ul class="list-unstyled">${commonPatterns}</ul>
+                    </div>
+                    
+                    <div class="analysis-section">
+                        <h6><i class="bi bi-lightbulb text-warning"></i> Recommendations:</h6>
+                        <ul>${recommendationsHtml}</ul>
+                    </div>
+                </div>
+            `;
+            
+            console.log('Setting results visibility');
+            resultsDiv.style.display = 'block';
+            placeholder.style.display = 'none';
+            console.log('Results displayed successfully');
+        }
+
+        function displayError(message) {
+            const resultsDiv = document.getElementById('results');
+            const placeholder = document.getElementById('placeholder');
+            
+            resultsDiv.innerHTML = `
+                <div class="alert alert-danger fade-in" role="alert">
+                    <i class="bi bi-exclamation-triangle"></i> ${message}
+                </div>
+            `;
+            
+            resultsDiv.style.display = 'block';
+            placeholder.style.display = 'none';
+        }
+
+        // Test Form Handler for User Input
+        document.getElementById('testForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const btn = this.querySelector('button[type="submit"]');
+            const loading = btn.querySelector('.loading');
+            const btnText = btn.querySelector('.btn-text');
+            
+            // Show loading state
+            loading.classList.add('show');
+            btnText.textContent = 'Running Tests...';
+            btn.disabled = true;
+            
+            const testPin = document.getElementById('testPin').value;
+            const testBirthDate = document.getElementById('testBirthDate').value;
+            const testSpouseBirthDate = document.getElementById('testSpouseBirthDate').value;
+            const testWeddingDate = document.getElementById('testWeddingDate').value;
+            
+            // Get selected test categories
+            const commonCheck = document.getElementById('commonCheck').checked;
+            const strengthCheck = document.getElementById('strengthCheck').checked;
+            const detailedCheck = document.getElementById('detailedCheck').checked;
+            
+            try {
+                // Run the user's custom test
+                const testResults = await runCustomTests(testPin, testBirthDate, testSpouseBirthDate, testWeddingDate, 
+                                                        commonCheck, strengthCheck, detailedCheck);
+                displayCustomTestResults(testResults);
+                
+            } catch (error) {
+                displayTestError('Error running custom test analysis. Please try again.');
+            } finally {
+                // Hide loading state
+                loading.classList.remove('show');
+                btnText.textContent = 'Run Test Analysis';
+                btn.disabled = false;
+            }
+        });
+
+        async function runCustomTests(pin, birthDate, spouseBirthDate, weddingDate, commonCheck, strengthCheck, detailedCheck) {
+            const results = {
+                pin: pin,
+                length: pin.length,
+                tests: []
+            };
+            
+            // Validate PIN first
+            if (!pin || !pin.match(/^\d{4,6}$/)) {
+                throw new Error('Please enter a valid 4 or 6 digit PIN');
+            }
+            
+            // Test 1: Common Pattern Detection (Part A)
+            if (commonCheck) {
+                try {
+                    const response = await fetch('/api/check_mpin', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ pin: pin, birth_date: '', spouse_birth_date: '', wedding_date: '' })
+                    });
+                    const result = await response.json();
+                    
+                    results.tests.push({
+                        name: 'Part A: Common Pattern Detection',
+                        description: 'Checks if PIN uses common patterns (1111, 1234, etc.)',
+                        result: result.is_common ? 'COMMON' : 'NOT COMMON',
+                        status: result.success ? 'PASSED' : 'FAILED',
+                        details: result.is_common ? 'PIN uses a common pattern' : 'PIN does not use common patterns',
+                        icon: result.is_common ? 'bi-exclamation-triangle text-warning' : 'bi-check-circle text-success'
+                    });
+                } catch (error) {
+                    results.tests.push({
+                        name: 'Part A: Common Pattern Detection',
+                        result: 'ERROR',
+                        status: 'FAILED',
+                        details: 'Test failed to execute',
+                        icon: 'bi-x-circle text-danger'
+                    });
+                }
+            }
+            
+            // Test 2: Strength Classification (Part B)
+            if (strengthCheck) {
+                try {
+                    const response = await fetch('/api/check_mpin', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ pin: pin, birth_date: birthDate, spouse_birth_date: spouseBirthDate, wedding_date: weddingDate })
+                    });
+                    const result = await response.json();
+                    
+                    results.tests.push({
+                        name: 'Part B: Strength Classification',
+                        description: 'Evaluates overall PIN strength with demographic data',
+                        result: result.strength,
+                        status: result.success ? 'PASSED' : 'FAILED',
+                        details: `PIN strength classified as: ${result.strength}`,
+                        icon: result.strength === 'STRONG' ? 'bi-shield-check text-success' : 'bi-shield-exclamation text-warning'
+                    });
+                } catch (error) {
+                    results.tests.push({
+                        name: 'Part B: Strength Classification',
+                        result: 'ERROR',
+                        status: 'FAILED',
+                        details: 'Test failed to execute',
+                        icon: 'bi-x-circle text-danger'
+                    });
+                }
+            }
+            
+            // Test 3: Detailed Analysis (Part C)
+            if (detailedCheck) {
+                try {
+                    const response = await fetch('/api/check_mpin', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ pin: pin, birth_date: birthDate, spouse_birth_date: spouseBirthDate, wedding_date: weddingDate })
+                    });
+                    const result = await response.json();
+                    
+                    const reasonsText = result.reasons.length > 0 ? result.reasons.join(', ') : 'No security issues found';
+                    results.tests.push({
+                        name: 'Part C: Detailed Analysis with Reasons',
+                        description: 'Provides detailed breakdown of security issues',
+                        result: `${result.strength} (Score: ${result.analysis.strength_score}/100)`,
+                        status: result.success ? 'PASSED' : 'FAILED',
+                        details: `Security issues: ${reasonsText}`,
+                        reasons: result.reasons,
+                        recommendations: result.analysis.recommendations,
+                        icon: result.reasons.length === 0 ? 'bi-award text-success' : 'bi-exclamation-triangle text-warning'
+                    });
+                } catch (error) {
+                    results.tests.push({
+                        name: 'Part C: Detailed Analysis with Reasons',
+                        result: 'ERROR',
+                        status: 'FAILED',
+                        details: 'Test failed to execute',
+                        icon: 'bi-x-circle text-danger'
+                    });
+                }
+            }
+            
+            return results;
+        }
+
+        function displayCustomTestResults(results) {
+            const testResultsDiv = document.getElementById('testResults');
+            
+            const testsHtml = results.tests.map(test => {
+                const statusClass = test.status === 'PASSED' ? 'test-passed' : 'test-failed';
+                
+                let detailsHtml = `<p><strong>Result:</strong> ${test.result}</p>
+                                   <p><strong>Details:</strong> ${test.details}</p>`;
+                
+                if (test.reasons && test.reasons.length > 0) {
+                    detailsHtml += `<p><strong>Security Issues:</strong></p>
+                                    <ul class="mb-2">
+                                        ${test.reasons.map(reason => `<li class="text-warning">${reason.replace(/_/g, ' ')}</li>`).join('')}
+                                    </ul>`;
+                }
+                
+                if (test.recommendations && test.recommendations.length > 0) {
+                    detailsHtml += `<p><strong>Recommendations:</strong></p>
+                                    <ul class="mb-0">
+                                        ${test.recommendations.slice(0, 3).map(rec => `<li class="text-info">${rec}</li>`).join('')}
+                                    </ul>`;
+                }
+                
+                return `
+                    <div class="test-result-item ${statusClass}">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <strong><i class="bi ${test.icon}"></i> ${test.name}</strong>
+                            </div>
+                            <span class="badge ${test.status === 'PASSED' ? 'bg-success' : 'bg-danger'}">
+                                ${test.status}
+                            </span>
+                        </div>
+                        <p class="text-muted small mb-2">${test.description}</p>
+                        <div class="mt-2">
+                            ${detailsHtml}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            const passedCount = results.tests.filter(test => test.status === 'PASSED').length;
+            const totalCount = results.tests.length;
+            
+            testResultsDiv.innerHTML = `
+                <div class="fade-in">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6>Test Results for PIN: ${results.pin}</h6>
+                        <span class="badge ${passedCount === totalCount ? 'bg-success' : 'bg-warning'} fs-6">
+                            ${passedCount}/${totalCount} Tests Passed
+                        </span>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <div class="text-center p-2 border rounded">
+                                <div class="h5 text-primary">${results.pin}</div>
+                                <small>Test PIN</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-2 border rounded">
+                                <div class="h5 text-info">${results.length} digits</div>
+                                <small>PIN Length</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-2 border rounded">
+                                <div class="h5 ${passedCount === totalCount ? 'text-success' : 'text-warning'}">${passedCount}/${totalCount}</div>
+                                <small>Tests Passed</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="test-results">
+                        ${testsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayTestError(message) {
+            document.getElementById('testResults').innerHTML = `
+                <div class="alert alert-danger fade-in" role="alert">
+                    <i class="bi bi-exclamation-triangle"></i> ${message}
+                </div>
+            `;
+        }
+
+        // Input validation for PIN fields
+        document.getElementById('pin').addEventListener('input', function(e) {
+            // Allow only digits
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+
+        document.getElementById('testPin').addEventListener('input', function(e) {
+            // Allow only digits
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+
+        // Date input validation
+        function validateDateInput(inputId) {
+            const input = document.getElementById(inputId);
+            if (input) {
+                input.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/[^0-9]/g, '');
+                    if (value.length >= 2) {
+                        value = value.substring(0, 2) + '-' + value.substring(2);
+                    }
+                    if (value.length >= 5) {
+                        value = value.substring(0, 5) + '-' + value.substring(5, 9);
+                    }
+                    e.target.value = value;
+                });
+            }
+        }
+
+        validateDateInput('birthDate');
+        validateDateInput('spouseBirthDate');
+        validateDateInput('weddingDate');
+        validateDateInput('testBirthDate');
+        validateDateInput('testSpouseBirthDate');
+        validateDateInput('testWeddingDate');
+
+        // Theme Toggle Functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const html = document.documentElement;
+
+        // Load saved theme or default to light
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        setTheme(savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            setTheme(newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+
+        function setTheme(theme) {
+            html.setAttribute('data-theme', theme);
+            
+            if (theme === 'dark') {
+                themeIcon.className = 'bi bi-sun-fill';
+                themeToggle.title = 'Switch to light mode';
+            } else {
+                themeIcon.className = 'bi bi-moon-fill';
+                themeToggle.title = 'Switch to dark mode';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -28,20 +28,26 @@ try:
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'development-secret-key')
     app.config['DEBUG'] = not is_production  # Only debug in development
     
-    @app.route('/')
-    def index():
-        """Main page with MPIN strength checker interface"""
-        return render_template('index.html')
-    
+    # Health check endpoint for Render
     @app.route('/health')
     def health_check():
-        """Health check endpoint for Render"""
+        """Health check endpoint for Render monitoring"""
         return jsonify({
             'status': 'healthy',
             'timestamp': datetime.now().isoformat(),
             'service': 'MPIN Analyzer',
-            'environment': os.environ.get('FLASK_ENV', 'unknown')
+            'environment': 'production' if is_production else 'development'
         })
+    
+    @app.route('/ping')
+    def ping():
+        """Simple ping endpoint"""
+        return 'pong'
+    
+    @app.route('/')
+    def index():
+        """Main page with MPIN strength checker interface"""
+        return render_template('index.html')
     
     @app.route('/ping')
     def ping():

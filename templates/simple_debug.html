@@ -132,24 +132,47 @@
         /* Mobile responsive improvements */
         @media (max-width: 767.98px) {
             body {
-                padding: 0.5rem;
+                padding: 0;
                 margin: 0;
+                overflow-x: hidden;
             }
             
             .container {
-                padding: 0.75rem;
+                padding: 1rem;
                 margin: 0;
+                width: 100vw;
+                max-width: 100vw;
+                border-radius: 0;
+                left: 0;
+                right: 0;
+            }
+            
+            .row {
+                margin-left: 0;
+                margin-right: 0;
                 width: 100%;
-                max-width: 100%;
+            }
+            
+            .row > * {
+                padding-left: 0;
+                padding-right: 0;
+                margin-bottom: 0.75rem;
+                width: 100%;
+            }
+            
+            .card {
+                margin-left: 0;
+                margin-right: 0;
+                width: 100%;
                 border-radius: 10px;
             }
             
             .card-body {
-                padding: 0.875rem;
+                padding: 1rem;
             }
             
             .card-header {
-                padding: 0.75rem 0.875rem;
+                padding: 0.75rem 1rem;
                 font-size: 0.95rem;
             }
             
@@ -158,6 +181,9 @@
                 min-height: 48px;
                 padding: 0.875rem 1rem;
                 border-radius: 8px;
+                width: 100%;
+                margin-left: 0;
+                margin-right: 0;
             }
             
             .form-control {
@@ -165,6 +191,8 @@
                 min-height: 48px;
                 padding: 0.875rem 0.75rem;
                 border-radius: 8px;
+                width: 100%;
+                box-sizing: border-box;
             }
             
             .form-label {
@@ -175,23 +203,15 @@
             h1 {
                 font-size: 1.4rem;
                 margin-bottom: 0.5rem;
-            }
-            
-            .row.g-3 {
-                margin-left: 0;
-                margin-right: 0;
-            }
-            
-            .row.g-3 > * {
-                padding-left: 0;
-                padding-right: 0;
-                margin-bottom: 0.75rem;
+                text-align: center;
+                padding-right: 2.5rem;
             }
             
             .theme-toggle {
                 top: 0.75rem;
-                right: 0.75rem;
+                right: 1rem;
                 padding: 0.4rem;
+                position: absolute;
             }
             
             .mt-3.mt-md-4 {
